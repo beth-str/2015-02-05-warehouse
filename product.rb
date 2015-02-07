@@ -102,16 +102,20 @@ class Product
 
   def self.location(city)
     x = DATABASE.execute("SELECT id from locations WHERE city = '#{city}'")
+    x = x[0]
+    x = x["id"]
     DATABASE.execute("SELECT * FROM products WHERE location_id = #{x}")
   end
 
   def self.category(genre)
     x = DATABASE.execute("SELECT id from categories WHERE genre = '#{genre}'")
+    x = x[0]
+    x = x["id"]
     DATABASE.execute("SELECT * FROM products WHERE category_id = #{x}")
   end
   
   def self.delete(title)
-      DATABASE.execute(DELETE FROM products WHERE title = '#{title}')
+      DATABASE.execute("DELETE FROM products WHERE title = '#{title}'")
   end
   
 end

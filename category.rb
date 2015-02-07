@@ -9,12 +9,8 @@ class Category
     @genre = options["genre"]
   end
   
-  def insert    #insert a NEW record into db
-    # If you were doing from the command line:
-    # INSERT INTO students (name) VALUES ('Andrew');
-    #Run in terminal Question.all
+  def insert 
     
-    # YOU MUST USE SINGLE QUOTES AROUND THE STRING INTERPOLATION:
     DATABASE.execute("INSERT INTO categories (genre) VALUES ('#{@genre}')")
     @id = DATABASE.last_insert_row_id     # will return the value of the row id
   end

@@ -3,7 +3,7 @@ class Location
   attr_accessor :city
   
   def initialize(options)
-    @id = options["id"]
+    @id   = options["id"]
     @city = options["city"]
   end
 
