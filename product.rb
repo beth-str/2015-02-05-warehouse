@@ -68,12 +68,6 @@ class Product
     z = self.new(record_details)
   end
 
-  # def self.search
-  #   results = DATABASE.execute("SELECT * FROM products WHERE
-  #                             user_input_column =
-  #                             '#{user_input_search_term}'")
-  # end
-
   def save 
       attributes = []
       query_components_array = []
@@ -118,4 +112,14 @@ class Product
       DATABASE.execute("DELETE FROM products WHERE title = '#{title}'")
   end
   
+  # def display
+  #   results = [results]
+  #   results.each do |k,v|
+  #     if value.is_a?(Float)
+  #       puts "#{k}: $#{v}.00"
+  #     else
+  #       puts "#{k}: #{v}"
+  #     end
+  #   end
+  # end
 end
