@@ -1,5 +1,7 @@
+require_relative 'driver.rb'
+
 class Product
-  # include Manage
+  include Driver
   
   attr_reader :id
   attr_accessor :isbn, :title, :author, :description, :cost, :price, :quantity, :category_id, :location_id
@@ -51,14 +53,17 @@ class Product
 
   def self.where_author_is(author)
     results = DATABASE.execute("SELECT * FROM products WHERE author = '#{author}'")
-    
-    results_as_objects = []
-    
-    results.each do |r|     # r is a hash 
-      # this loops through and creates an array of objects
-      results_as_objects << self.new(r) 
+    results.each do |x|
+      puts "#{x[0]}: #{x[2]} by #{x[3]}   (Quantity in stock: #{7})"
     end
-    z = results_as_objects[0]
+    #
+    # results_as_objects = []
+    #
+    # results.each do |r|     # r is a hash
+    #   # this loops through and creates an array of objects
+    #   results_as_objects << self.new(r)
+    # end
+    # z = results_as_objects[0]
   end
 
   def self.where_id_is(record_id)
@@ -91,7 +96,10 @@ class Product
   end
   
   def self.all
-    DATABASE.execute("SELECT * FROM products")
+    x = DATABASE.execute("SELECT * FROM products")
+    x.each do |x|
+        puts "#{x[0]}: #{x[2]} by #{x[3]}"
+    end
   end
 
   def self.location(city)

@@ -6,9 +6,8 @@ require_relative 'db_setup.rb'
 require_relative 'category.rb'
 require_relative 'location.rb'
 require_relative 'product.rb'
-# require_relative "module"
-# include Manage
-#
+require_relative 'driver.rb'
+
 #CLI Menu to facilitate the user interface...
 puts "-" * 80
 puts "Welcome to the FANTASTIC BOOKS Inventory Management Tool."
@@ -23,7 +22,7 @@ until users_choice == 9 do
   puts "1. Add a new product"
   puts "2. Edit a product (e.g., change product genre, update quantity, change location, etc.)"
   puts "3. Delete a product"
-  puts "4. Show products (e.g., by title, by genre, or by location, etc.)"
+  puts "4. Show products (e.g., by title, by location, or by genre, etc.)"
   puts "-" * 80
   puts "GENRE MANAGEMENT"
   puts "5. Add a new genre"
@@ -57,6 +56,7 @@ until users_choice == 9 do
       x.insert
       puts "#{x} has now been added to the database."
       x.inspect 
+
   elsif users_choice == 2
     puts "How would you like to search for the item to edit:"
     puts "1. Author"
@@ -66,7 +66,7 @@ until users_choice == 9 do
         puts "Enter the Author (Example: 'Harper Lee')"
         author = gets.chomp.to_s
         result = Product.where_author_is(author)
-        puts result.inspect
+
       elsif user_input == 2
         puts "Enter the Title (Example: 'To Kill a Mockingbird')"
         title = gets.chomp.to_s
@@ -150,6 +150,7 @@ until users_choice == 9 do
             result.save
             result
           end
+
   elsif users_choice == 3
     puts "How would you like to search for the item you want to delete:"
     puts "1. Author"
@@ -158,27 +159,34 @@ until users_choice == 9 do
       if user_input == 1
         puts "Enter the Author (Example: 'Harper Lee')"
         author = gets.chomp.to_s
-        result = Product.where_author_is(author)
-        result.inspect
-        puts "Which of these titles by #{author} would you like to delete?"
+        Product.where_author_is(author)
+        puts "Which of these titles by #{author} would you like to delete? (e.g., 'Kill Shot')"
+        # result.each do |x|
+        #     puts "#{x[0]}: #{x[2]} by #{x[3]}"
+        # end
+        
         title = gets.chomp.to_s
-        puts "Are you sure you want to delete #{result}? (y/n)"
+        puts "Are you sure you want to delete #{title}? (y/n)"
         yes_no = gets.chomp.to_s.downcase
-          if yes_no = y
+          if yes_no == "y"
           Product.delete(title)
           puts "#{title} has been deleted."
+          else 
+            return 9
           end
       elsif user_input == 2
+        x = Product.all
         puts "Enter the Title to delete (Example: 'To Kill a Mockingbird')"
         title = gets.chomp.to_s
         result = Product.where_title_is(title)
         puts "Are you sure you want to delete #{result.title}? (y/n)"
         yes_no = gets.chomp.to_s.downcase
-          if yes_no = y
+          if yes_no == "y"
           Product.delete(title)
           puts "#{title} has been deleted."
           end
       end
+
   elsif users_choice == 4
     puts "How would you like to view products?"
     puts "1. All products."
@@ -187,39 +195,62 @@ until users_choice == 9 do
     view_input = gets.chomp.to_i
     if view_input == 1
       x = Product.all
-      puts x
+      # x.each do |x|
+      #   puts "#{x[0]}: #{x[2]}   by #{x[3]}"
+      # end
     elsif view_input == 2
       puts "What warehouse location would you like to see? (e.g., 'Omaha NE')"
       city_input = gets.chomp.to_s
       x = Product.location(city_input)
-        if x == nil
+        if x == []
           puts "There are no products at this location."
         else  
-          x.inspect
+          puts "Products in #{city_input}:"
+          x.each do |x|
+            puts "#{x[0]}: #{x[2]}   by #{x[3]}"
+          end
         end
     elsif view_input == 3
       puts "What genre would you like to view? (e.g., 'suspense')"
       genre_input = gets.chomp.to_s
-      x = Product.location(genre_input)
-        if x == nil
-          puts "There are no products at this location."
-        else  
-          x.inspect
+      x = Product.category(genre_input)
+      if x == []
+        puts "There are no products assigned to this genre."
+      else  
+        puts "Products in genre: #{genre_input}:"
+        x.each do |x|
+          puts "#{x[0]}: #{x[2]}   by #{x[3]}"
         end
+      end
     end
+
   elsif users_choice == 5
     puts "What is the name of the new genre? (e.g., 'graphic novel')"
     new_genre_input = gets.chomp.to_s
     x = Category.new({'genre' => "#{new_genre_input}"})
     x.insert
     puts "#{new_genre_input} has been added to the database."
-    x.inspect
+
   elsif users_choice == 6
     puts "What is the name of the genre you want to delete? (e.g., 'romance')"
     delete_genre_input = gets.chomp.to_s
     puts "Warning: If products are assigned to this genre, it cannot be deleted."
+    results = DATABASE.execute("SELECT * FROM products INNER JOIN categories ON Products.category_id = Categories.id WHERE genre = '#{delete_genre_input}'")
+    if results != []
+    puts "These products are assigned to this genre:"
+      results.each do |x|
+        puts "#{x[0]}: #{x[2]} - #{x[11]}"
+      end
+    end
     x = DATABASE.execute("SELECT id FROM categories WHERE genre = '#{delete_genre_input}'")
-    Category.delete(x)
+    x = x[0]
+    genre_id = x["id"]
+    Category.delete(genre_id)
+    if results == []
+      puts "Success! #{delete_genre_input} has been deleted."
+    else puts "This genre cannot be deleted until all products are re-assigned to another genre."
+    end
+
   elsif users_choice == 7
     puts "What is the name of the new warehouse location? (e.g., 'Sioux City IA')"
     new_location_input = gets.chomp.to_s
@@ -227,65 +258,31 @@ until users_choice == 9 do
     x.insert
     puts "#{new_location_input} has been added to the database."
     x.inspect
+
   elsif users_choice == 8
+    puts ''
+    puts Location.all
     puts "What is the name of the location you want to delete? (e.g., 'Sioux City IA')"
     delete_location_input = gets.chomp.to_s
     puts "Warning: If products are assigned to this location, it cannot be deleted."
-    x = DATABASE.execute("SELECT id FROM locations WHERE city = '#{delete_location_inDput}'")
-    Location.delete(x)
+    results = DATABASE.execute("SELECT * FROM products INNER JOIN locations ON Products.location_id = Locations.id WHERE city = '#{delete_location_input}'")
+    if results != []
+    puts "These products are assigned to this location:"
+      results.each do |x|
+        puts "#{x[0]}: #{x[2]} - #{x[11]}"
+      end
+    end
+    x = DATABASE.execute("SELECT id FROM locations WHERE city = '#{delete_location_input}'")
+    x = x[0]
+    location_id = x["id"]
+    Location.delete(location_id)
+      if results == []
+        puts "Success! #{delete_location_input} has been deleted."
+      else puts "This location cannot be deleted until all products are re-assigned to another location."
+      end
+
   elsif users_choice == 9
     puts "Thank you. Please come again!"
   end
 end
 binding.pry
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-#
-#   title = gets.chomp.to_s
-#   puts "Enter the author:"
-#   author = gets.chomp.to_s
-#
-#
-#   puts "Enter the name of the restaurant:"
-#   restaurant = gets.chomp.to_s
-#   puts "Enter the names of the people who are attending this event. (Enter the names as a comma-separated list.)"
-#   attendees = gets.chomp
-#   # attendees = names.split(", ")
-#   binding.pry
-#   dc.create_new_event(date, restaurant, *attendees)
-# end
-# elsif users_choice == 2
-#   puts "Enter the amount of the meal:"
-#   amt = gets.chomp.to_i
-#   puts "Enter the amount of the tip. (Example for a 20% tip, enter 20.)"
-#   tip = gets.chomp.to_i
-#   dc.reconcile(amt, tip)
-# elsif users_choice == 3
-#   puts "Current club members include:"
-#   dc.members.each do |name, amt|
-#     puts "#{name}"
-#   end
-# elsif users_choice == 4
-#   #add a new member to the club
-#   puts "Who would you like to add to your dinner club:"
-#   name = gets.chomp.to_s
-#   dc.add_member(name)
-#   puts "Current members now include:"
-#   dc.members.each do |name, amt|
-#     puts "#{name}"
-#   end
-# elsif users_choice == 5
-#   puts "Please come again!"
-# end

@@ -1,6 +1,7 @@
+require_relative 'driver.rb'
+
 class Category
-  # include Manage
-  
+  include Driver
   attr_reader :id
   attr_accessor :genre
   

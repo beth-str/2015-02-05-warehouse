@@ -1,4 +1,7 @@
+require_relative 'driver.rb'
+
 class Location
+  include Driver
   attr_reader :id
   attr_accessor :city
   
@@ -13,10 +16,15 @@ class Location
   end
   
   def self.all
-    DATABASE.execute("SELECT * FROM locations")
+    x = DATABASE.execute("SELECT * FROM locations")
+    x.each do |x|
+        puts "#{x[0]}: #{x[1]}"
+    end
   end
   
   def self.delete(id_to_remove)
+# SELECT * FROM products INNER JOIN categories ON Products.category_id = Categories.id WHERE genre = "adventure";
+ 
     x = DATABASE.execute("SELECT location_id FROM products WHERE location_id = #{id_to_remove}")
     if x.length == 0
       DATABASE.execute("DELETE FROM locations WHERE id = #{id_to_remove}")
