@@ -15,19 +15,100 @@ module Driver
     end
     return
   end
+  
+  # def save
+  #   attributes = []
+  #   query_components_array = []
+  #
+  #   instance_variables.each do |i|
+  #     attributes << i.to_s.delete("@")
+  #   end
+  #
+  #   attributes.each do |a|
+  #     value = self.send(a)
+  #     if value.is_a?(Integer) || value.is_a?(Float)
+  #       query_components_array << "#{a} = #{self.send(a)}"
+  #     else
+  #       query_components_array << "#{a} = '#{self.send(a)}'"
+  #     end
+  #   end
+  # end
 
 end
 
+#-----------------------------------------
+# Code to be implemented after thorough testing
 
-#   def display
-#     x = {"id"=>1, "city"=>"Atlanta GA", 0=>1, 1=>"Atlanta GA"}
-# {"id"=>2, "city"=>"Dallas TX", 0=>2, 1=>"Dallas TX"}
-# {"id"=>3, "city"=>"Omaha NE", 0=>3, 1=>"Omaha NE"}
-# {"id"=>4, "city"=>"Seattle WA", 0=>4, 1=>"Seattle WA"}
-# {"id"=>5, "city"=>"San Francisco CA", 0=>5, 1=>"San Francisco CA"}
-# {"id"=>7, "city"=>"Aberdeen SD", 0=>7, 1=>"Aberdeen SD"}
-# {"id"=>8, "city"=>"Juneau AK", 0=>8, 1=>"Juneau AK"}
 #
+# def display_attr
+#  attributes = []
+#  query_components_array = []
+#
+#  instance_variables.each do |i|
+#    attributes << i.to_s.delete("@")
+#  end
+#
+#  attributes.each do |a|
+#    value = self.send(a)
+#    if value.is_a?(Float)
+#      front_spacer = " " * (12 - a.length)
+#      back_spacer = " " * (49 - ("#{self.send(a)}".length))
+#      puts "#{a}:" + "#{front_spacer}" + "#{back_spacer}" + "$#{self.send(a)}"
+#    else
+#      front_spacer = " " * (12 - a.length)
+#      back_spacer = " " * (50 - ("#{self.send(a)}".length))
+#      puts "#{a}:" + "#{front_spacer}" + "#{back_spacer}" + "#{self.send(a)}"
+#    end
+#  end
+#  puts "=" * 63
+#  return
+# end
+#
+#
+#
+# def format_many(array_of_objects)
+#   count = 0
+#   array_of_objects.each do |x|
+#     count += 1
+#     puts "Product #{count}:"
+#     x.display_attr
 #   end
-  
-  
+# end
+#
+#
+# def self.where_title_is(title)
+#   results = DATABASE.execute("SELECT * FROM products WHERE title = '#{title}'")
+#
+#   results_as_objects = []
+#
+#   results.each do |r|     # r is a hash
+#     # this loops through and creates an array of objects
+#     results_as_objects << self.new(r)
+#   end
+#   results_as_objects
+# end
+#
+#
+# def self.where_author_is(author)
+#   results = DATABASE.execute("SELECT * FROM products WHERE author = '#{author}'")
+#   results.each do |x|
+#     puts "#{x[0]}: #{x[2]} by #{x[3]}   (Quantity in stock: #{7})"
+#   end
+#
+#   results_as_objects = []
+#
+#   results.each do |r|     # r is a hash
+#     # this loops through and creates an array of objects
+#     results_as_objects << self.new(r)
+#   end
+#   results_as_objects
+# end
+#
+#
+# def self.where_id_is(record_id)
+#   results = DATABASE.execute("SELECT * FROM products WHERE id =
+#                              #{record_id}")
+#   record_details = results[0] # Hash of the record details.
+#   z = self.new(record_details)
+#   z.display_attr
+# end

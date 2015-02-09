@@ -1,42 +1,44 @@
 require 'pry'
 require 'sqlite3'
 require 'hirb'
-require 'yaml'
 require_relative 'db_setup.rb'
 require_relative 'category.rb'
 require_relative 'location.rb'
 require_relative 'product.rb'
-require_relative 'driver.rb'
 
-#CLI Menu to facilitate the user interface...
-puts "-" * 80
-puts "Welcome to the FANTASTIC BOOKS Inventory Management Tool."
-puts "Choose an action from the list below:"
+# This is the CLI Menu to facilitate the user interface.
+# It is a hot mess and needs to be split into driver methods,
+# but we were glad to just get it functional.
+#-----------------------------------------------------------------------
 users_choice = 0
 
 until users_choice == 9 do
   sleep(2)
+  system "clear"
+  puts "*" * 90
+  puts "Welcome to the FANTASTIC BOOKS Inventory Management Tool."
+  puts "Choose an action from the list below:"
   puts
-  puts "-" * 80
+  puts "-" * 90
   puts "PRODUCT MANAGEMENT"
-  puts "1. Add a new product"
-  puts "2. Edit a product (e.g., change product genre, update quantity, change location, etc.)"
-  puts "3. Delete a product"
-  puts "4. Show products (e.g., by title, by location, or by genre, etc.)"
-  puts "-" * 80
+  puts "1. ADD a new product"
+  puts "2. EDIT a product (e.g., change product genre, update quantity, change location, etc.)"
+  puts "3. DELETE a product"
+  puts "4. VIEW products (e.g., by title, by location, or by genre, etc.)"
+  puts "-" * 90
   puts "GENRE MANAGEMENT"
-  puts "5. Add a new genre"
-  puts "6. Delete a genre"
-  puts "-" * 80
+  puts "5. ADD a new genre"
+  puts "6. DELETE a genre"
+  puts "-" * 90
   puts "LOCATION MANAGEMENT"
-  puts "7. Add a new location"
-  puts "8. Delete a location"
-  puts "-" * 80
-  puts "9. Exit"
-  puts
+  puts "7. ADD a new location"
+  puts "8. DELETE a location"
+  puts "-" * 90
+  puts "9. EXIT"
+  puts "*" * 90
   users_choice = gets.chomp.to_i
 
-#**********************************************************
+#****************************************************************************************
   attributes_list = ["isbn", "title", "author", "description", "cost",
                      "price", "quantity", "category_id", "location_id"]
   attributes_hash = {"isbn" => nil, "title" => nil, "author" => nil,
@@ -44,6 +46,7 @@ until users_choice == 9 do
                      "quantity" => nil, "category_id" => nil, "location_id" => nil}
 
   if users_choice == 1
+    puts ''
     attributes_list.each do |x|
       puts "Enter the #{x}:"
       user_input = gets.chomp
@@ -54,10 +57,11 @@ until users_choice == 9 do
     end
       x = Product.new(attributes_hash)
       x.insert
-      puts "#{x} has now been added to the database."
-      x.inspect 
+      puts "#{x.title} has now been added to the database:"
+      x.display
 
   elsif users_choice == 2
+    puts ''
     puts "How would you like to search for the item to edit:"
     puts "1. Author"
     puts "2. Title"
@@ -66,13 +70,15 @@ until users_choice == 9 do
         puts "Enter the Author (Example: 'Harper Lee')"
         author = gets.chomp.to_s
         result = Product.where_author_is(author)
-
+        puts "Which of these titles by #{author} would you like to edit? (e.g., 'Kill Shot')"
+        title = gets.chomp.to_s
+        book_to_edit = Product.where_title_is(title)
       elsif user_input == 2
         puts "Enter the Title (Example: 'To Kill a Mockingbird')"
         title = gets.chomp.to_s
-        result = Product.where_title_is(title)
-        puts result.inspect
+        book_to_edit = Product.where_title_is(title)
       end
+        puts "Great! Let's edit #{book_to_edit.title}."
         puts "Which field would you like to edit?"
         puts "1. Author"
         puts "2. Title"
@@ -84,74 +90,90 @@ until users_choice == 9 do
         puts "8. Quantity"
         field_input = gets.chomp.to_i
           if field_input == 1
-            put "Current author is: #{result.author}"
-            puts "What is the new Author? (e.g., 'Harper Lee)"
+            puts "Current author is: #{book_to_edit.author}"
+            puts "What is the new Author? (e.g., 'Harper Lee')"
             author_input = gets.chomp.to_s
-            result.author = author_input
-            result.save
-            result
+            book_to_edit.author = author_input
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new author has been saved:"
+            book_to_edit.display
           elsif field_input == 2
-            put "Current title is: #{result.title}"
+            puts "Current title is: #{book_to_edit.title}"
             puts "What is the new Title? (e.g., 'To Kill a Mockingbird')"
             title_input = gets.chomp.to_s
-            result.title = title_input
-            result.save
-            result
+            book_to_edit.title = title_input
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new title has been saved:"
+            book_to_edit.display
           elsif field_input == 3
-            puts "Current description is: #{result.description}"
+            puts "Current description is: #{book_to_edit.description}"
             puts "What is the new Description? (e.g., 'Hardcover')"
             description_input = gets.chomp.to_s
-            result.description = description_input
-            result.save
-            result
+            book_to_edit.description = description_input
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new description has been saved:"
+            book_to_edit.display
           elsif field_input == 4
-            puts "Current price is: #{result.price}"
+            puts "Current price is: #{book_to_edit.price}"
             puts "What is the new Price? (e.g., 8.99)"
             price_input = gets.chomp.to_f
-            result.price = price_input
-            result.save
-            result
+            book_to_edit.price = price_input
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new price has been saved:"
+            book_to_edit.display
           elsif field_input == 5
-            puts "Current cost is: #{result.cost}"
+            puts "Current cost is: #{book_to_edit.cost}"
             puts "What is the new Cost? (e.g., 2.99)"
             cost_input = gets.chomp.to_f
-            result.cost = cost_input
-            result.save
-            result
+            book_to_edit.cost = cost_input
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new cost has been saved:"
+            book_to_edit.display
           elsif field_input == 6
-            puts "Current location is: #{result.location_id}"
+            puts "Current location is: #{book_to_edit.city}"
             puts "What is the new Warehouse location for this product? 
                  (e.g., Dallas TX)"
-            # x = DATABASE.execute("SELECT * from locations")
             city_input = gets.chomp.to_s
             x = DATABASE.execute("SELECT id from locations WHERE city =
                                  '#{city_input}'")
             x = x[0]
             x = x["id"]
-            result.location_id = x
-            result.save
-            result
+            book_to_edit.location_id = x
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new location has been saved:"
+            book_to_edit.display
           elsif field_input == 7
-            puts "Current genre is: #{result.category_id}"
+            puts "Current genre is: #{book_to_edit.genre}"
             puts "What is the new Genre for this product? (e.g., 'horror')"
             genre_input = gets.chomp.to_s
             x = DATABASE.execute("SELECT id from locations WHERE city = 
                                  '#{city_input}'")
             x = x[0]
             x = x["id"]
-            result.category_id = x
-            result.save
-            result
+            book_to_edit.category_id = x
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new genre has been saved:"
+            book_to_edit.display
           elsif field_input == 8
-            puts "Current quantity is: #{result.quantity}"
+            puts "Current quantity is: #{book_to_edit.quantity}"
             puts "What is the new Quantity for this product? (e.g., 10)"
             quantity_input = gets.chomp.to_i
-            result.quantity
-            result.save
-            result
+            book_to_edit.quantity
+            book_to_edit.save
+            sleep(1)
+            puts "Success! The new quantity has been saved:"
+            book_to_edit.display
           end
 
   elsif users_choice == 3
+    puts ''
     puts "How would you like to search for the item you want to delete:"
     puts "1. Author"
     puts "2. Title"
@@ -188,6 +210,7 @@ until users_choice == 9 do
       end
 
   elsif users_choice == 4
+    puts ''
     puts "How would you like to view products?"
     puts "1. All products."
     puts "2. All products in a certain warehouse."
@@ -225,6 +248,7 @@ until users_choice == 9 do
     end
 
   elsif users_choice == 5
+    puts ''
     puts "What is the name of the new genre? (e.g., 'graphic novel')"
     new_genre_input = gets.chomp.to_s
     x = Category.new({'genre' => "#{new_genre_input}"})
@@ -232,6 +256,8 @@ until users_choice == 9 do
     puts "#{new_genre_input} has been added to the database."
 
   elsif users_choice == 6
+    puts ''
+    puts Category.all
     puts "What is the name of the genre you want to delete? (e.g., 'romance')"
     delete_genre_input = gets.chomp.to_s
     puts "Warning: If products are assigned to this genre, it cannot be deleted."
@@ -252,6 +278,7 @@ until users_choice == 9 do
     end
 
   elsif users_choice == 7
+    puts ''
     puts "What is the name of the new warehouse location? (e.g., 'Sioux City IA')"
     new_location_input = gets.chomp.to_s
     x = Location.new({'city' => "#{new_location_input}"})
